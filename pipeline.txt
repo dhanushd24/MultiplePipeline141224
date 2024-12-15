@@ -1,0 +1,126 @@
+
+DevOps Tools Used - GitHub , Jenkins 
+
+
+
+IN GITHUB :-
+
+create a sample Java Spring Boot GitHub repository.
+
+GITHUB repository should contains a valid Jenkins file.
+
+
+
+
+
+Install Jenkins
+
+Inside Jenkins :-
+
+Install Required Plugins as below ,
+
+    stage view
+    config file provider
+    Git
+    GitHub Integration 
+    Maven Integration
+    Pipeline 
+
+
+
+Jenkins dashboard --> New Item → Select "Multibranch Pipeline" --> Name the project.
+
+Jenkins dashboard --> Manage Jenkins --> Tools(Add below tools)
+  - add jdk
+  - add maven
+
+On config we add 
+  - Maven compile
+  - maven test
+
+
+Select "GitHub" as the source.
+Add credentials (GitHub personal access token).
+Specify the repository URL.
+
+Ensure the "Script Path" is set to the Jenkinsfile (default: root of the project).
+
+
+Use groovy Script in Declarative pipeline
+
+pipeline {
+    agent any
+    tools {
+        jdk 'jdk17'
+        maven 'maven3'
+   }
+
+    stages {
+        stage(''GIT NEW CHECKOUT') {
+            steps {
+                git branch: 'main', credentialsId: 'git-cred', url: 'https://github.com/XYZ.git'
+            }
+        }
+        stage('MAVEN COMPILE') {
+            steps {
+                sh "mvn compile"
+            }
+        }
+        stage('MAVEN TEST') {
+            steps {
+                sh "mvn test"
+            }
+        }
+	stage('MAVEN BUILD') {
+            steps {
+               sh "mvn package"
+            }
+        }
+    }    
+
+       post {
+        always {
+            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+        }
+    }
+}
+
+
+
+
+Jenkins --> Manage Jenkins --> Configure System --> GitHub Plugin Configuration.
+
+Add your GitHub Server credentials.
+
+
+In GIHUB:-
+
+GitHub repository --> Settings --> Webhooks --> Add Webhook.
+Under "GitHub Webhook", copy the URL format for your Jenkins instance (e.g., http://<JENKINS_URL>:<PORT>/github-webhook/).
+ 
+       Paste the Jenkins Webhook URL.
+       Content Type to application/json.
+       Select events for the webhook: "Just the push event."
+       Save the webhook.
+
+In Jenkins :-
+
+Dashboard-->Project-->Config-->gihub project(own GitHub URL) --> Selec (Gihub Hook Trigger for GITscm Polling) --> apply --> save
+
+
+Push a change to a branch in the GitHub repository.
+Observe if Jenkins:
+Detects the branch.
+Automatically triggers a build for that branch.
+Verify the build logs and results in Jenkins.
+
+
+
+
+
+
+
+
+
+
+
